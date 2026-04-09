@@ -2,7 +2,7 @@
 
 A Monte Carlo simulation tool for scoring World Cup fantasy tournaments. Run thousands of simulated tournaments to estimate expected fantasy points for each player's team, based on real team ratings and a fully modeled FIFA 2026 bracket.
 
-**Live App:** [worldcupfantasytool on Streamlit](https://worldcupfantasytool-skzfpy8eawqyqd263rhtuw.streamlit.app/)
+**Live App:** [worldcupfantasytool on Streamlit](https://worldcupfantasy-auagibnd8zmjhc7e4uixgu.streamlit.app/)
 
 ---
 
