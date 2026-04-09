@@ -1,0 +1,57 @@
+fantasy_teams = {
+    'Bobby' : ['FRANCE',
+        'SWITZERLAND',
+        'TURKEY',
+        'GHANA',
+        'ALGERIA',
+        'IRAQ'],
+
+    'Cheryl' : ['SPAIN',
+        'URUGUAY',
+        'SWEDEN',
+        'IVORY COAST',
+        'NEW ZEALAND',
+        'CAPE VERDE'],
+
+    'Eric' : ['ARGENTINA',
+        'JAPAN',
+        'USA',
+        'CZECH REPUBLIC',
+        'BOSNIA HERZEGOVINA',
+        'CURACAO'],
+
+    'Mandy' : ['GERMANY',
+        'MEXICO',
+        'CROATIA',
+        'AUSTRALIA',
+        'QATAR',
+        'JORDAN'],
+
+    'Sarah' : ['BRAZIL',
+        'COLOMBIA',
+        'ECUADOR',
+        'PARAGUAY',
+        'TUNISIA',
+        'HAITI'],
+
+    'Phil' : ['ENGLAND',
+        'MORROCO',
+        'AUSTRIA',
+        'SENEGAL',
+        'IRAN',
+        'UZBEKISTAN'],
+
+    'Matt' : ['PORTUGAL',
+        'NETHERLANDS',
+        'CANADA',
+        'EGYPT',
+        'DR CONGO',
+        'SAUDI ARABIA'],
+
+    'Martin' : ['NORWAY',
+        'BELGIUM',
+        'SCOTLAND',
+        'SOUTH KOREA',
+        'SOUTH AFRICA',
+        'PANAMA']
+}
