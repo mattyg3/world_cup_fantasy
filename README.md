@@ -1,114 +1,179 @@
 # ⚽ World Cup Fantasy Tool
 
-A Monte Carlo simulation tool for scoring World Cup fantasy tournaments. Run thousands of simulated tournaments to estimate expected fantasy points for each player's team, based on real team ratings and a fully modeled FIFA 2026 bracket.
+A fast, configurable Monte Carlo simulation engine for modeling FIFA
+World Cup tournaments and estimating fantasy outcomes. Built with a
+probabilistic match model, ELO-based ratings, and a fully implemented
+2026 tournament structure.
 
-**Live App:** [worldcupfantasytool on Streamlit](https://worldcupfantasy-auagibnd8zmjhc7e4uixgu.streamlit.app/)
+🚀 **Live App:**
+https://worldcupfantasy-auagibnd8zmjhc7e4uixgu.streamlit.app/
 
----
+------------------------------------------------------------------------
 
-## How It Works
+## 🧠 Overview
 
-The simulator runs N complete World Cup tournaments (default: 20,000) and tracks how far each national team advances. Fantasy player scores are then calculated by summing the expected points earned by each team in their roster across all simulations.
+This tool simulates thousands of complete World Cup tournaments to
+estimate:
 
-**Point values per round:**
-| Round | Points |
-|---|---|
-| Group Stage | Points = group stage points earned (W=3, D=1) if team advances to Round of 32 |
-| Round of 16 | +7 |
-| Quarterfinals | +8 |
-| Semifinals | +9 |
-| Final | +10 |
-| Champion | +11 |
+-   📊 Expected fantasy points per team
+-   🏆 Advancement probabilities (R32 → Champion)
+-   🎯 Fantasy roster performance
 
-### Match Simulation
+It is designed for both **fantasy optimization** and **tournament
+modeling experimentation**.
 
-Each match uses a Poisson goal model where expected goals for each team are derived from their rating differential. An **upset factor** adds a normally-distributed shock to the expected goals, making lower-rated teams more likely to win than pure ratings would suggest. Knockout matches that end level go to a simulated penalty shootout (coin flip).
+------------------------------------------------------------------------
 
-### Tournament Structure
+## ⚙️ Simulation Model
 
-The bracket follows the **exact FIFA 2026 format**: 12 groups of 4, a Round of 32 (including the 8 best third-place finishers), then Round of 16, Quarterfinals, Semifinals, and Final.
+### Rating System
 
----
+Input ratings (1--99) are converted into an ELO-like scale:
 
-## Features
+    ELO = 1200 + (rating - 50) * 15
 
-- **Monte Carlo simulation** — run 100 to 100,000 tournaments
-- **Adjustable upset factor** — dial up chaos or play it chalk
-- **Fantasy leaderboard** — expected score per player, visualized as a bar chart
-- **Per-team breakdown** — advancement probabilities for every round
-- **Custom ratings** — upload your own `team_ratings.csv` to override defaults
-- **CSV export** — download the current ratings data at any time
+This enables smoother probability curves and more realistic matchups.
 
----
+------------------------------------------------------------------------
 
-## Project Structure
+### Match Outcome Model
 
-```
-world_cup_fantasy_tool/
-├── app.py              # Streamlit UI
-├── sim_functions.py    # Simulation engine (match model, bracket logic, scoring)
-├── fantasy_teams.py    # Fantasy player rosters
-├── team_ratings.csv    # Default team ratings
-└── requirements.txt    # Python dependencies
-```
+Each match is simulated in two stages:
 
----
+#### 1. Outcome Sampling
 
-## Running Locally
+-   Win probability is computed using a logistic function
+-   Draw probability decreases with rating difference
+-   Probabilities are normalized to sum to 1
 
-**1. Clone the repo**
-```bash
-git clone https://github.com/mattyg3/world_cup_fantasy_tool.git
-cd world_cup_fantasy_tool
-```
+#### 2. Upset Factor
 
-**2. Install dependencies**
-```bash
-pip install -r requirements.txt
-```
+A configurable **upset factor** injects controlled randomness:
 
-**3. Run the app**
-```bash
-streamlit run app.py
-```
+-   Low values → chalk (favorites dominate)
+-   Medium values (\~0.1) → realistic tournaments
+-   High values → chaos
 
----
+------------------------------------------------------------------------
 
-## Customization
+### Score Generation
+
+Goals are generated using a Poisson process conditioned on the match
+result:
+
+-   Ensures statistical realism
+-   Guarantees consistency with sampled outcome (win/draw/loss)
+
+------------------------------------------------------------------------
+
+### Knockouts
+
+-   Same model as group stage
+-   Draws resolved via **penalty shootout (coin flip)**
+
+------------------------------------------------------------------------
+
+## 🏆 Tournament Format (2026)
+
+-   12 groups (4 teams each)
+-   Top 2 + 8 best 3rd-place teams advance
+-   Knockout rounds:
+    -   Round of 32
+    -   Round of 16
+    -   Quarterfinals
+    -   Semifinals
+    -   Final
+
+------------------------------------------------------------------------
+
+## 💰 Fantasy Scoring
+
+  Stage           Points
+  --------------- ---------------------------------------
+  Group Stage     Points earned (W=3, D=1) if advancing
+  Round of 16     +7
+  Quarterfinals   +8
+  Semifinals      +9
+  Final           +10
+  Champion        +11
+
+------------------------------------------------------------------------
+
+## 📦 Features
+
+-   🔁 Monte Carlo simulation (100 → 100,000 runs)
+-   🎚 Adjustable upset factor
+-   📈 Advancement probabilities for every team
+-   🧮 Expected fantasy points calculation
+-   📊 Streamlit dashboard with visualizations
+-   📁 CSV upload/download for custom ratings
+-   🧩 Modular simulation engine
+
+------------------------------------------------------------------------
+
+## 🗂 Project Structure
+
+    world_cup_fantasy_tool/
+    ├── app.py              # Streamlit UI
+    ├── sim_functions.py    # Simulation engine
+    ├── fantasy_teams.py    # Fantasy rosters
+    ├── team_ratings.csv    # Default ratings
+    └── requirements.txt    # Dependencies
+
+------------------------------------------------------------------------
+
+## 🚀 Running Locally
+
+    git clone https://github.com/mattyg3/world_cup_fantasy_tool.git
+    cd world_cup_fantasy_tool
+    pip install -r requirements.txt
+    streamlit run app.py
+
+------------------------------------------------------------------------
+
+## 🔧 Customization
 
 ### Team Ratings
 
-The default `team_ratings.csv` contains a `Team`, `Group`, and `Rating` column. You can edit ratings and re-upload the CSV in the app sidebar to reflect your own power rankings.
+Edit or upload a CSV:
 
-```csv
-Team,Group,Rating
-Brazil,A,85
-France,B,84
-...
-```
+    Team,Group,Rating
+    Brazil,A,85
+    France,B,84
 
-### Fantasy Rosters
+------------------------------------------------------------------------
 
-Edit `fantasy_teams.py` to define player names and their drafted national teams:
+### Fantasy Teams
 
-```python
-fantasy_teams = {
-    "Alice": ["Brazil", "France", "Germany", ...],
-    "Bob":   ["Argentina", "England", "Spain", ...],
-}
-```
+Define rosters in `fantasy_teams.py`:
 
----
+    fantasy_teams = {
+        "Alice": ["Brazil", "France", "Germany"],
+        "Bob": ["Argentina", "England", "Spain"],
+    }
 
-## Tech Stack
+------------------------------------------------------------------------
 
-- [Streamlit](https://streamlit.io/) — web app framework
-- [NumPy](https://numpy.org/) — Poisson goal modeling and upset shocks
-- [Pandas](https://pandas.pydata.org/) — data handling and display
+## 🧪 Calibration
 
----
+The engine tracks internal metrics for tuning:
 
-## License
+-   `total_goals` → goal distribution
+-   `match_draws` → draw rate
+-   `upset_rate` → underdog win frequency
+
+Useful for refining realism and parameter tuning.
+
+------------------------------------------------------------------------
+
+## 🛠 Tech Stack
+
+-   Streamlit
+-   NumPy
+-   Pandas
+
+------------------------------------------------------------------------
+
+## 📄 License
 
 MIT
-

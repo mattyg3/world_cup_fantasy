@@ -1,63 +1,106 @@
 import random
 from collections import defaultdict
 import numpy as np
-
-# -----------------------------
-# CONFIG
-# -----------------------------
-# DRAW_PROB = 0.25  # probability of draw in group stage
-# UPSET_FACTOR = 0.1 # added randomness for upsets (higher equals more upsets)
+total_goals = []
+match_draws = []
+upset_rate = []
 
 # -----------------------------
 # TEAM STRUCTURE
 # -----------------------------
+def to_elo(rating_1_99):
+    return 1200 + (rating_1_99 - 50) * 15
+
 class Team:
     def __init__(self, name, group, rating):
         self.name = name
         self.group = group
-        self.rating = rating
+        self.raw_rating = rating
+        self.rating = to_elo(rating)
 
 # -----------------------------
 # MATCH SIMULATION
 # -----------------------------
 
+def win_probability(team_a, team_b):
+    diff = team_a.rating - team_b.rating
+    return 1 / (1 + np.exp(-diff / 300))
+
+def match_probs(team_a, team_b):
+    p_win = win_probability(team_a, team_b)
+    # p_win_b = win_probability(team_b, team_a)
+    # p_draw = 0.2
+
+    diff = abs(team_a.rating - team_b.rating)
+    p_draw = 0.4 * np.exp(-diff / 800)
+
+    # normalize so everything sums to 1
+    p_loss = 1 - p_win
+    total = p_win + p_draw + p_loss
+
+    return p_win / total, p_draw / total, p_loss / total
+
+def sample_result(team_a, team_b, upset_factor):
+    p_win, p_draw, p_loss = match_probs(team_a, team_b)
+
+    r = np.random.random()
+
+    if r < p_win:
+        if r < upset_factor:
+            return "B"
+        else:
+            return "A"
+    elif r < p_win + p_draw:
+        return "D"
+    else:
+        if r < upset_factor:
+            return "A"
+        else:
+            return "B"
+    
+def generate_score(team_a, team_b, result):
+    base = 1
+
+    lambda_a = base * np.exp((team_a.rating - team_b.rating)/1800)
+    lambda_b = base * np.exp((team_b.rating - team_a.rating)/1800)
+
+    g1 = np.random.poisson(lambda_a)
+    g2 = np.random.poisson(lambda_b)
+
+    if result == "D":
+        return g1, g1  # force draw
+
+    elif result == "A":
+        if g1 < g2:
+            return g2, g1
+        else:
+            return g1+1, g2
+
+    else:  # B wins
+        if g2 < g1:
+            return g2, g1
+        else:
+            return g1, g2+1
+            
 def simulate_score(team_a, team_b, upset_factor):
-    base_goals = 2.5
+    result = sample_result(team_a, team_b, upset_factor)
+    goals_a, goals_b = generate_score(team_a, team_b, result)
+    # Calibration Stats
+    total_goals.append(goals_a+goals_b)
 
-    diff = (team_a.rating - team_b.rating) / 60
+    if goals_a == goals_b:
+        match_draws.append(1)
+    else:
+        match_draws.append(0)
 
-    lambda_a = base_goals/2 + diff
-    lambda_b = base_goals/2 - diff
-
-    gap = abs(team_a.rating - team_b.rating) / 100
-    shock_scale = upset_factor * (0.5 + 0.5 * (1 - gap))
-
-    shock = np.random.normal(0, shock_scale)
-
-    factor = np.exp(shock * 1.5)
-
-    lambda_a = lambda_a * factor
-    lambda_b = lambda_b / factor
-
-    if lambda_a < 0:
-        lambda_a = 0
-    if lambda_b < 0:
-        lambda_b = 0
-
-    goals_a = np.random.poisson(lambda_a)
-    goals_b = np.random.poisson(lambda_b)
-
-    # --- Upset override ---
-    if goals_a != goals_b:
-        rating_diff = abs(team_a.rating - team_b.rating)
-        # upset_prob = upset_factor * (1 - (rating_diff / 100)) * 1.5
-        upset_prob = upset_factor * (0.2 + 0.8 * (1 - rating_diff / 100))
-
-        if np.random.random() < upset_prob:
-            return (goals_b, goals_a) if goals_a > goals_b else (goals_a, goals_b)
-
-
+    if goals_a > goals_b and team_b.rating > team_a.rating:
+        upset_rate.append(1)
+    elif goals_b > goals_a and team_a.rating > team_b.rating:
+        upset_rate.append(1)
+    else:
+        upset_rate.append(0)
     return goals_a, goals_b
+
 
 def simulate_knockout(team_a, team_b, upset_factor):
     g1, g2 = simulate_score(team_a, team_b, upset_factor)
