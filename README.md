@@ -88,14 +88,14 @@ result:
 
 ## 💰 Fantasy Scoring
 
-  Stage           Points
-  --------------- ---------------------------------------
- - Group Stage     Points earned (W=3, D=1) if advancing
- - Round of 16     +7
- - Quarterfinals   +8
- - Semifinals      +9
- - Final           +10
- - Champion        +11
+  Stage          | Points
+  ---------------| ---------------------------------------
+ - Group Stage   |  Points earned (W=3, D=1) if advancing
+ - Round of 16   |  +7
+ - Quarterfinals |  +8
+ - Semifinals    |  +9
+ - Final         |  +10
+ - Champion      |  +11
 
 ------------------------------------------------------------------------
 
